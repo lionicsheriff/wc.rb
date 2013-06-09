@@ -4,7 +4,7 @@ require 'sqlite3'
 DB_NAME = 'wc.db'
 db = SQLite3::Database.new(DB_NAME)
 
-db.execute <<SQL
+db.execute_batch <<SQL
 
   CREATE TABLE IF NOT EXISTS word_count (
     id integer primary key,
@@ -22,16 +22,19 @@ Dir.glob('**') do | file |
   words = `wc -w #{file}`.split(' ')[0]
   timestamp = Time.now.strftime('%F')
 
-  db.execute <<SQL
+  puts "#{path} #{words}"
+
+  db.execute_batch <<SQL
 
     INSERT OR IGNORE INTO word_count (path, words, timestamp) 
     VALUES ('#{path}', '#{words}', '#{timestamp}');
 
     UPDATE word_count
     SET words = '#{words}'
-    WHERE changes() == 0
+    WHERE changes() = 0
     AND path = '#{path}'
     AND timestamp = '#{timestamp}';
+
 SQL
   
 end

@@ -30,7 +30,8 @@ Dir.glob('**') do | file |
     UPDATE word_count
     SET words = '#{words}'
     WHERE path = '#{path}'
-    AND timestamp = '#{timestamp}'
+    AND timestamp = '#{timestamp}';
+
 SQL
   
 end

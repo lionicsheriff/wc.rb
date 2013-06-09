@@ -23,6 +23,7 @@ Dir.glob('**') do | file |
   timestamp = Time.now.strftime('%F')
 
   db.execute <<SQL
+
     INSERT OR IGNORE INTO word_count (path, words, timestamp) 
     VALUES ('#{path}', '#{words}', '#{timestamp}');
 

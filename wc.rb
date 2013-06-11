@@ -48,7 +48,7 @@ SQL
 
    todays_words = words.to_i - prev_day[0][0].to_i
 
-   puts "#{path} #{words}(#{todays_words})"
+   puts "#{path} #{words} (#{todays_words})"
   
 end
 

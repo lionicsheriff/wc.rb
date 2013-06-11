@@ -22,7 +22,6 @@ Dir.glob('**') do | file |
   words = `wc -w #{file}`.split(' ')[0]
   timestamp = Time.now.strftime('%F')
 
-  puts "#{path} #{words}"
 
   db.execute_batch <<SQL
 
@@ -36,6 +35,20 @@ Dir.glob('**') do | file |
     AND timestamp = '#{timestamp}';
 
 SQL
+
+  prev_day = db.execute <<SQL
+
+    SELECT words
+    FROM word_count
+    WHERE path = '#{path}'
+    ORDER BY timestamp DESC
+    LIMIT 1,1
+
+SQL
+
+   todays_words = words.to_i - prev_day[0][0].to_i
+
+   puts "#{path} #{words}(#{todays_words})"
   
 end
 

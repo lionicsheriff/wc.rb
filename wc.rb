@@ -59,10 +59,10 @@ Dir.glob('**') do | file |
   SQL
 
 
-   prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0
-   todays_words = words.to_i - prev_day_words.to_i
+  prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0
+  todays_words = words.to_i - prev_day_words.to_i
 
-   puts "#{path} #{words} (#{todays_words})"
+  puts "#{path} #{words} (#{todays_words})"
   
 end
 

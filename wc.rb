@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'sqlite3'
+require 'date'
 
 DB_NAME = 'wc.db'
 db = SQLite3::Database.new(DB_NAME)
@@ -10,7 +11,7 @@ db.execute_batch <<SQL
     id integer primary key,
     path string,
     words integer,
-    timestamp date DEFAULT CURRENT_DATE,
+    timestamp integer,
     UNIQUE (path, timestamp)
   );
 
@@ -20,23 +21,9 @@ Dir.glob('**') do | file |
   path = File.absolute_path(file)
   next if path == File.absolute_path(DB_NAME) || path == File.absolute_path(__FILE__)
   words = `wc -w #{file}`.split(' ')[0]
-  timestamp = Time.now.strftime('%F')
+  timestamp = Time.now.getutc.to_i
 
-
-  db.execute_batch <<SQL
-
-    INSERT OR IGNORE INTO word_count (path, words, timestamp) 
-    VALUES ('#{path}', '#{words}', '#{timestamp}');
-
-    UPDATE word_count
-    SET words = '#{words}'
-    WHERE changes() = 0
-    AND path = '#{path}'
-    AND timestamp = '#{timestamp}';
-
-SQL
-
-  prev_day = db.execute <<SQL
+  last_word_count = db.execute <<SQL
 
     SELECT words
     FROM word_count
@@ -46,7 +33,34 @@ SQL
 
 SQL
 
-   todays_words = words.to_i - prev_day[0][0].to_i
+  if last_word_count.size > 0 and last_word_count[0][0] != words then
+
+    db.execute_batch <<SQL
+
+      INSERT  INTO word_count (path, words, timestamp) 
+      VALUES ('#{path}', '#{words}', '#{timestamp}');
+
+SQL
+
+  end
+
+
+
+  prev_day = db.execute <<SQL
+
+    SELECT max(words)
+    FROM word_count
+    WHERE path = '#{path}'
+    AND timestamp < '#{Date.today.to_time.getutc.to_i}'
+    GROUP BY path,date(timestamp, 'unixepoch')
+    ORDER BY timestamp desc
+    LIMIT 1
+
+SQL
+
+
+   prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0
+   todays_words = words.to_i - prev_day_words.to_i
 
    puts "#{path} #{words} (#{todays_words})"
   

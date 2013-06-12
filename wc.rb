@@ -5,7 +5,7 @@ require 'date'
 DB_NAME = 'wc.db'
 db = SQLite3::Database.new(DB_NAME)
 
-db.execute_batch <<SQL
+db.execute_batch <<-SQL
 
   CREATE TABLE IF NOT EXISTS word_count (
     id integer primary key,
@@ -23,7 +23,7 @@ Dir.glob('**') do | file |
   words = `wc -w #{file}`.split(' ')[0]
   timestamp = Time.now.getutc.to_i
 
-  last_word_count = db.execute <<SQL
+  last_word_count = db.execute <<-SQL
 
     SELECT words
     FROM word_count
@@ -31,22 +31,22 @@ Dir.glob('**') do | file |
     ORDER BY timestamp DESC
     LIMIT 1,1
 
-SQL
+  SQL
 
   if last_word_count.size > 0 and last_word_count[0][0].to_i != words.to_i then
 
-    db.execute_batch <<SQL
+    db.execute_batch <<-SQL
 
       INSERT  INTO word_count (path, words, timestamp) 
       VALUES ('#{path}', '#{words}', '#{timestamp}');
 
-SQL
+    SQL
 
   end
 
 
 
-  prev_day = db.execute <<SQL
+  prev_day = db.execute <<-SQL
 
     SELECT max(words)
     FROM word_count
@@ -56,7 +56,7 @@ SQL
     ORDER BY timestamp desc
     LIMIT 1
 
-SQL
+  SQL
 
 
    prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0

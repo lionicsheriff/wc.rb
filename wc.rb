@@ -33,7 +33,7 @@ Dir.glob('**') do | file |
 
 SQL
 
-  if last_word_count.size > 0 and last_word_count[0][0] != words then
+  if last_word_count.size > 0 and last_word_count[0][0].to_i != words.to_i then
 
     db.execute_batch <<SQL
 

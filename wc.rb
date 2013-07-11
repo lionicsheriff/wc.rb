@@ -71,6 +71,7 @@ end
 total = today.values.reduce(:+) || 0
 
 puts "Today: #{total}"
+puts
 today.each do |path, count|
   puts "#{path}: #{count}"
 end

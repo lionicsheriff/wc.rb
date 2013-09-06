@@ -1,8 +1,20 @@
 #!/usr/bin/env ruby
 require 'sqlite3'
 require 'date'
+require 'optparse'
 
-DB_NAME = 'wc.db'
+CONFIG = {}
+OptionParser.new do |o|
+  o.on('-s') { CONFIG[:summary] = true }
+  o.on('-b PATH') { |path| CONFIG[:base] = path }
+  o.on('-d NAME') { |name| CONFIG[:dbname] = name }
+  o.on('-h') { puts o; exit }
+  o.parse!
+end
+
+BASE = CONFIG[:base] || "."
+DB_NAME = "#{BASE}/" + ( CONFIG[:dbname] || 'wc.db' )
+
 db = SQLite3::Database.new(DB_NAME)
 
 db.execute_batch <<-SQL
@@ -19,7 +31,7 @@ SQL
 
 today = {} # used to store the changes for today (path => {today => int, total => int})
 
-Dir.glob('**') do | file |
+Dir.glob("#{BASE}/**") do | file |
   path = File.absolute_path(file)
   next if path == File.absolute_path(DB_NAME) || path == File.absolute_path(__FILE__)
   words = `wc -w #{file}`.split(' ')[0]
@@ -50,16 +62,14 @@ Dir.glob('**') do | file |
 
   prev_day = db.execute <<-SQL
 
-    SELECT max(words)
+    SELECT words
     FROM word_count
     WHERE path = '#{path}'
     AND timestamp < '#{Date.today.to_time.getutc.to_i}'
-    GROUP BY path,date(timestamp, 'unixepoch')
     ORDER BY timestamp desc
     LIMIT 1
 
   SQL
-
 
   prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0
   todays_words = words.to_i - prev_day_words.to_i
@@ -72,9 +82,12 @@ end
 
 total = today.values.map { |f| f[:today] }.reduce(0, :+)
 
-puts "Today: #{total}"
-puts
-today.each do |path, words|
-  puts "#{path}: #{words[:today]} (#{words[:total]})"
+if CONFIG[:summary]
+  puts total
+else
+  puts "Today: #{total}"
+  puts
+  today.each do |path, words|
+    puts "#{path}: #{words[:today]} (#{words[:total]})"
+  end
 end
-

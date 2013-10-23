@@ -5,11 +5,15 @@ require 'optparse'
 
 CONFIG = {}
 OptionParser.new do |o|
+  o.banner = "Usage: #{$0} [options]"
+  o.separator = ""
+  
   o.on('-s') { CONFIG[:summary] = true }
   o.on('-b PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME') { |name| CONFIG[:dbname] = name }
   o.on('-g GOAL') { |goal| CONFIG[:goal] = goal }
   o.on('-h') { puts o; exit }
+  
   o.parse!
 end
 

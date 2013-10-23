@@ -8,6 +8,7 @@ OptionParser.new do |o|
   o.on('-s') { CONFIG[:summary] = true }
   o.on('-b PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME') { |name| CONFIG[:dbname] = name }
+  o.on('-g GOAL') { |goal| CONFIG[:goal] = goal }
   o.on('-h') { puts o; exit }
   o.parse!
 end
@@ -81,11 +82,15 @@ Dir.glob("#{BASE}/**") do | file |
 end
 
 total = today.values.map { |f| f[:today] }.reduce(0, :+)
+remaining = if CONFIG[:goal]
+              CONFIG[:goal] - today
+            end
+  
 
 if CONFIG[:summary]
-  puts total
+  puts total + (remaining ? " (#{remaining} words left)" : "")
 else
-  puts "Today: #{total}"
+  puts "Today: #{total}" + (remaining ? ", #{remaining} words to go": "") 
   puts
   today.each do |path, words|
     puts "#{path}: #{words[:today]} (#{words[:total]})"

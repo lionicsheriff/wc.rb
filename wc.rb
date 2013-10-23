@@ -17,7 +17,7 @@ OptionParser.new do |o|
   o.on('-s') { CONFIG[:summary] = true }
   o.on('-b PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME') { |name| CONFIG[:dbname] = name }
-  o.on('-g GOAL') { |goal| CONFIG[:goal] = goal }
+  o.on('-g GOAL') { |goal| CONFIG[:goal] = goal.to_i }
 
   o.separator ""
   o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }
@@ -105,7 +105,7 @@ end
 
 total = today.values.map { |f| f[:today] }.reduce(0, :+)
 remaining = if CONFIG[:goal]
-              CONFIG[:goal] - today
+              CONFIG[:goal] - total
             end
   
 

@@ -4,6 +4,8 @@ require 'date'
 require 'optparse'
 
 CONFIG = {
+  :db_name => 'wc.db',
+  :base => '.',
   :summary_format => "%{today}",
   :header_format => "Today: %{today}",
   :item_format => "%{path}: %{today} (%{total})",
@@ -16,7 +18,7 @@ OptionParser.new do |o|
   
   o.on('-s') { CONFIG[:summary] = true }
   o.on('-b PATH') { |path| CONFIG[:base] = path }
-  o.on('-d NAME') { |name| CONFIG[:dbname] = name }
+  o.on('-d NAME') { |name| CONFIG[:db_name] = name }
   o.on('-g GOAL') { |goal| CONFIG[:goal] = goal.to_i }
 
   o.separator ""
@@ -33,10 +35,7 @@ OptionParser.new do |o|
   o.parse!
 end
 
-BASE = CONFIG[:base] || "."
-DB_NAME = "#{BASE}/" + ( CONFIG[:dbname] || 'wc.db' )
-
-db = SQLite3::Database.new(DB_NAME)
+db = SQLite3::Database.new(CONFIG[:db_name])
 
 db.execute_batch <<-SQL
 
@@ -52,9 +51,9 @@ SQL
 
 today = {} # used to store the changes for today (path => {today => int, total => int})
 
-Dir.glob("#{BASE}/**") do | file |
+Dir.glob("#{CONFIG[:base]}/**") do | file |
   path = File.absolute_path(file)
-  next if path == File.absolute_path(DB_NAME) || path == File.absolute_path(__FILE__)
+  next if path == File.absolute_path(CONFIG[:db_name]) || path == File.absolute_path(__FILE__)
   words = `wc -w #{file}`.split(' ')[0]
   timestamp = Time.now.getutc.to_i
 

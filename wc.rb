@@ -3,7 +3,14 @@ require 'sqlite3'
 require 'date'
 require 'optparse'
 
-CONFIG = {}
+CONFIG = {
+  :summary_format => "%{today}",
+  :header_format => "Today: %{today}",
+  :item_format => "%{path}: %{today} (%{total})",
+  :remaining_summary_format => "(%{remaining})",
+  :remaining_full_format => ", %{remaining} words left"
+}
+
 OptionParser.new do |o|
   o.banner = "Usage: #{$0} [options]"
   o.separator = ""
@@ -12,6 +19,15 @@ OptionParser.new do |o|
   o.on('-b PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME') { |name| CONFIG[:dbname] = name }
   o.on('-g GOAL') { |goal| CONFIG[:goal] = goal }
+
+  o.seperator = ""
+  o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }
+  o.on('--header-format FORMAT') {|format| CONFIG[:header_format] = format }
+  o.on('--item-format FORMAT') {|format| CONFIG[:item_format] = format }
+  o.on('--remaining_summary_format FORMAT') {|format| CONFIG[:remaining_summary_format] = format }
+  o.on('--remaining_full_format FORMAT') {|format| CONFIG[:remaining_full_format] = format }
+
+  o.separator = ""
   o.on('--on-update SCRIPT') { |script| CONFIG[:update_hook] = script}
   o.on('-h') { puts o; exit }
   
@@ -95,11 +111,13 @@ remaining = if CONFIG[:goal]
   
 
 if CONFIG[:summary]
-  puts total + (remaining ? " (#{remaining} words left)" : "")
+  goal_message = remaining ? CONFIG[:remaining_summary_format] % {:remaining => remaining}, ""
+  puts (CONFIG[:summary_format] % {:today => total}) + goal_message
 else
-  puts "Today: #{total}" + (remaining ? ", #{remaining} words to go": "") 
+  goal_message = remaining ? CONFIG[:remaining_summary_format] % {:remaining => remaining}, ""
+  puts (CONFIG[:header_format] % {:today => total}) + goal_message
   puts
   today.each do |path, words|
-    puts "#{path}: #{words[:today]} (#{words[:total]})"
+    puts CONFIG[:item_format] % {:path => path, :today => today, :total => total}
   end
 end

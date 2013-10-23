@@ -7,8 +7,8 @@ CONFIG = {
   :summary_format => "%{today}",
   :header_format => "Today: %{today}",
   :item_format => "%{path}: %{today} (%{total})",
-  :remaining_summary_format => "(%{remaining})",
-  :remaining_full_format => ", %{remaining} words left"
+  :goal_summary_format => " (%{remaining})",
+  :goal_full_format => ", %{remaining} words left"
 }
 
 OptionParser.new do |o|
@@ -23,8 +23,8 @@ OptionParser.new do |o|
   o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }
   o.on('--header-format FORMAT') {|format| CONFIG[:header_format] = format }
   o.on('--item-format FORMAT') {|format| CONFIG[:item_format] = format }
-  o.on('--remaining_summary_format FORMAT') {|format| CONFIG[:remaining_summary_format] = format }
-  o.on('--remaining_full_format FORMAT') {|format| CONFIG[:remaining_full_format] = format }
+  o.on('--goal-summary-format FORMAT') {|format| CONFIG[:goal_summary_format] = format }
+  o.on('--goal-full-format FORMAT') {|format| CONFIG[:goal_full_format] = format }
 
   o.separator ""
   o.on('--on-update SCRIPT') { |script| CONFIG[:update_hook] = script}
@@ -110,11 +110,13 @@ remaining = if CONFIG[:goal]
   
 
 if CONFIG[:summary]
-  goal_message = remaining ? CONFIG[:remaining_summary_format] % {:remaining => remaining}: ""
-  puts (CONFIG[:summary_format] % {:today => total}) + goal_message
+  summary = CONFIG[:summary_format] % {:today => total}
+  summary <<  CONFIG[:goal_summary_format] % {:remaining => remaining} if remaining
+  puts summary
 else
-  goal_message = remaining ? CONFIG[:remaining_summary_format] % {:remaining => remaining}: ""
-  puts (CONFIG[:header_format] % {:today => total}) + goal_message
+  header = CONFIG[:header_format] % {:today => total}
+  header <<  CONFIG[:goal_full_format] % {:remaining => remaining} if remaining
+  puts header
   puts
   today.each do |path, words|
     puts CONFIG[:item_format] % {:path => path, :today => words[:today], :total => words[:total]}

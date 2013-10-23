@@ -6,6 +6,7 @@ require 'optparse'
 CONFIG = {
   :db_name => 'wc.db',
   :base => '.',
+  :ignore_regexp => '^\s?(#|\*)',
   :summary_format => "%{today}",
   :header_format => "Today: %{today}",
   :item_format => "%{path}: %{today} (%{total})",
@@ -20,6 +21,7 @@ OptionParser.new do |o|
   o.on('-b PATH', '--base PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME', '--database NAME') { |name| CONFIG[:db_name] = name }
   o.on('-g GOAL', '--goal GOAL') { |goal| CONFIG[:goal] = goal.to_i }
+  o.on('-i PATTERN', '--ignore-regexp PATTERN') {|pattern| CONFIG[:ignore_regexp] = pattern}
 
   o.separator ""
   o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }
@@ -51,10 +53,22 @@ SQL
 
 today = {} # used to store the changes for today (path => {today => int, total => int})
 
-Dir.glob("#{CONFIG[:base]}/**") do | file |
-  path = File.absolute_path(file)
+Dir.glob("#{CONFIG[:base]}/**") do | file_name |
+  path = File.absolute_path(file_name)
+
+  # ignore the database and this script
   next if path == File.absolute_path(CONFIG[:db_name]) || path == File.absolute_path(__FILE__)
-  words = `wc -w #{file}`.split(' ')[0]
+
+  words = 0
+  file = File.open(path)
+  file.each_line do |line|
+    # skip lines that match the ignore regexp (allows for commenting/annotation)
+    next if line.match(CONFIG[:ignore_regexp])
+
+    # count the number of words (tokens seperated by whitespace)
+    words += line.split("\s").length
+  end
+
   timestamp = Time.now.getutc.to_i
 
   last_word_count = db.execute <<-SQL

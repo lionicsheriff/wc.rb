@@ -38,7 +38,8 @@ OptionParser.new do |o|
   o.parse!
 end
 
-db = SQLite3::Database.new(CONFIG[:db_name])
+DB_LOCATION = "#{CONFIG[:base]}/#{CONFIG[:db_name]}"
+db = SQLite3::Database.new(DB_LOCATION)
 
 db.execute_batch <<-SQL
 
@@ -58,7 +59,7 @@ Dir.glob("#{CONFIG[:base]}/**") do | file_name |
   path = File.absolute_path(file_name)
 
   # ignore the database and this script
-  next if path == File.absolute_path(CONFIG[:db_name]) || path == File.absolute_path(__FILE__)
+  next if path == File.absolute_path(DB_LOCATION) || path == File.absolute_path(__FILE__)
 
   words = 0
   file = File.open(path)

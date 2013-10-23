@@ -16,10 +16,10 @@ CONFIG = {
 OptionParser.new do |o|
   o.separator ""
   
-  o.on('-s') { CONFIG[:summary] = true }
-  o.on('-b PATH') { |path| CONFIG[:base] = path }
-  o.on('-d NAME') { |name| CONFIG[:db_name] = name }
-  o.on('-g GOAL') { |goal| CONFIG[:goal] = goal.to_i }
+  o.on('-s', '--summary') { CONFIG[:summary] = true }
+  o.on('-b PATH', '--base PATH') { |path| CONFIG[:base] = path }
+  o.on('-d NAME', '--database NAME') { |name| CONFIG[:db_name] = name }
+  o.on('-g GOAL', '--goal GOAL') { |goal| CONFIG[:goal] = goal.to_i }
 
   o.separator ""
   o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }
@@ -30,7 +30,7 @@ OptionParser.new do |o|
 
   o.separator ""
   o.on('--on-update SCRIPT') { |script| CONFIG[:update_hook] = script}
-  o.on('-h') { puts o; exit }
+  o.on('-h', '--help') { puts o; exit }
   
   o.parse!
 end

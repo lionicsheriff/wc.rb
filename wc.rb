@@ -2,6 +2,7 @@
 require 'sqlite3'
 require 'date'
 require 'optparse'
+require 'iconv' unless String.method_defined?(:encode) # needed to fix dodgy encoding in files (String#encode is Ruby 1.9+)
 
 CONFIG = {
   :db_name => 'wc.db',
@@ -62,6 +63,15 @@ Dir.glob("#{CONFIG[:base]}/**") do | file_name |
   words = 0
   file = File.open(path)
   file.each_line do |line|
+    # fix dodgy encoding so the regexp can run
+    # via http://stackoverflow.com/a/8873922
+    if String.method_defined?(:encode)
+      line.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
+      line.encode!('UTF-8', 'UTF-16')
+    else
+      ic = Iconv.new('UTF-8', 'UTF-8//IGNORE')
+      file_contents = ic.iconv(file_contents)
+    end
     # skip lines that match the ignore regexp (allows for commenting/annotation)
     next if line.match(CONFIG[:ignore_regexp])
 

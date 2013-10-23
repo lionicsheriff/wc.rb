@@ -53,23 +53,6 @@ Dir.glob("#{BASE}/**") do | file |
 
   SQL
 
-  if last_word_count.size == 0 or last_word_count[0][0].to_i != words.to_i then
-
-    db.execute_batch <<-SQL
-
-      INSERT  INTO word_count (path, words, timestamp) 
-      VALUES ('#{path}', '#{words}', '#{timestamp}');
-
-    SQL
-    
-    if CONFIG[:updateHook]
-      `"#{updateHook}" "#{path}" "#{words}" "{#last_word_count[0][0].to_i}"`
-    end
-
-  end
-
-
-
   prev_day = db.execute <<-SQL
 
     SELECT words
@@ -83,6 +66,21 @@ Dir.glob("#{BASE}/**") do | file |
 
   prev_day_words = prev_day.size > 0 ? prev_day[0][0].to_i : 0
   todays_words = words.to_i - prev_day_words.to_i
+
+  if last_word_count.size == 0 or last_word_count[0][0].to_i != words.to_i then
+
+    db.execute_batch <<-SQL
+
+      INSERT  INTO word_count (path, words, timestamp) 
+      VALUES ('#{path}', '#{words}', '#{timestamp}');
+
+    SQL
+    
+    if CONFIG[:updateHook]
+      `"#{updateHook}" "#{path}" "#{words}" "{#prev_day_words}"`
+    end
+
+  end
 
   if todays_words > 0 then
     today[path] = {:today => todays_words, :total => words.to_i}

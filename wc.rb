@@ -117,6 +117,6 @@ else
   puts (CONFIG[:header_format] % {:today => total}) + goal_message
   puts
   today.each do |path, words|
-    puts CONFIG[:item_format] % {:path => path, :today => today, :total => total}
+    puts CONFIG[:item_format] % {:path => path, :today => words[:today], :total => words[:total]}
   end
 end

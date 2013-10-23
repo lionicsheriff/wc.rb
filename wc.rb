@@ -77,7 +77,7 @@ Dir.glob("#{BASE}/**") do | file |
     SQL
     
     if CONFIG[:updateHook]
-      `"#{updateHook}" "#{path}" "#{words}" "{#prev_day_words}"`
+      `"#{updateHook}" "#{path}" "#{words}" "#{prev_day_words}"`
     end
 
   end

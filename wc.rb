@@ -12,6 +12,7 @@ OptionParser.new do |o|
   o.on('-b PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME') { |name| CONFIG[:dbname] = name }
   o.on('-g GOAL') { |goal| CONFIG[:goal] = goal }
+  o.on('--on-update SCRIPT') { |script| CONFIG[:updateHook] = script}
   o.on('-h') { puts o; exit }
   
   o.parse!
@@ -60,6 +61,10 @@ Dir.glob("#{BASE}/**") do | file |
       VALUES ('#{path}', '#{words}', '#{timestamp}');
 
     SQL
+    
+    if CONFIG[:updateHook]
+      `"#{updateHook}" "#{path}" "#{words}" "{#last_word_count[0][0].to_i}"`
+    end
 
   end
 

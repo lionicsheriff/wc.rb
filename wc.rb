@@ -73,11 +73,12 @@ Dir.glob("#{CONFIG[:base]}/**") do | file_name |
       ic = Iconv.new('UTF-8', 'UTF-8//IGNORE')
       file_contents = ic.iconv(file_contents)
     end
+
     # skip lines that match the ignore regexp (allows for commenting/annotation)
     next if line.match(CONFIG[:ignore_regexp])
-
+ 
     # count the number of words (tokens seperated by whitespace)
-    words += line.split("\s").length
+    words += line.split.size
   end
 
   timestamp = Time.now.getutc.to_i

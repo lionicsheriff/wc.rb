@@ -7,7 +7,7 @@ require 'iconv' unless String.method_defined?(:encode) # needed to fix dodgy enc
 CONFIG = {
   :db_name => 'wc.db',
   :base => '.',
-  :ignore_regexp => '^\s?(#|\*)',
+  :ignore_regexp => /^\s*(#|\*)/,
   :summary_format => "%{today}",
   :header_format => "Today: %{today}",
   :item_format => "%{path}: %{today} (%{total})",
@@ -22,7 +22,7 @@ OptionParser.new do |o|
   o.on('-b PATH', '--base PATH') { |path| CONFIG[:base] = path }
   o.on('-d NAME', '--database NAME') { |name| CONFIG[:db_name] = name }
   o.on('-g GOAL', '--goal GOAL') { |goal| CONFIG[:goal] = goal.to_i }
-  o.on('-i PATTERN', '--ignore-regexp PATTERN') {|pattern| CONFIG[:ignore_regexp] = pattern}
+  o.on('-i PATTERN', '--ignore-regexp PATTERN') {|pattern| CONFIG[:ignore_regexp] = /#{pattern}/}
 
   o.separator ""
   o.on('--summary-format FORMAT') {|format| CONFIG[:summary_format] = format }

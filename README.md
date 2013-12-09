@@ -101,3 +101,8 @@ and the previous days word count.
 
 This runs individually for each document as its word count changes, so if you only care about one document you will
 want to test the path.
+
+License
+=======
+
+MIT
